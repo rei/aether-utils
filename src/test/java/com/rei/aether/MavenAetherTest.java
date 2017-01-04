@@ -14,14 +14,14 @@ public class MavenAetherTest {
     public void canResolveSingleDependency() {
         Aether aether = Aether.fromMavenSettings();
         aether.getConfiguredRepositories().forEach(System.out::println);
-        Artifact artifact = aether.resolveSingleArtifact("com.rei.devops:bigip-client:1.13");
+        Artifact artifact = aether.resolveSingleArtifact("org.apache.commons:commons-lang3:RELEASE");
         assertNotNull(artifact);
     }
-    
+
     @Test
     public void canResolveDependencies() {
         Aether aether = Aether.fromMavenSettings();
-        List<Artifact> dependencies = aether.resolveDependencies(new DefaultArtifact("com.rei.devops:bigip-client:1.13"));
+        List<Artifact> dependencies = aether.resolveDependencies(new DefaultArtifact("org.apache.commons:commons-lang3:3.3.2"));
         assertFalse(dependencies.isEmpty());
         dependencies.forEach(d -> {
             System.out.println(d);
