@@ -34,7 +34,7 @@ public class ConfiguredAether extends Aether {
     }
 
     @Override
-    protected List<RemoteRepository> getConfiguredRepositories() {
+    public List<RemoteRepository> getConfiguredRepositories() {
         return repos;
     }
 

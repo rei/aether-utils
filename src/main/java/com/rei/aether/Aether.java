@@ -119,10 +119,10 @@ public abstract class Aether {
 
         return locator.getService(RepositorySystem.class);    
     }
-    
+
+    public abstract List<RemoteRepository> getConfiguredRepositories();
     protected abstract DefaultRepositorySystemSession newRepositorySystemSession();
-    protected abstract List<RemoteRepository> getConfiguredRepositories();
-    
+
     public static Aether fromMavenSettings() {
         return new MavenAether();
     }

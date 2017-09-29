@@ -45,7 +45,7 @@ class MavenAether extends Aether {
     }
 
     @Override
-    protected List<RemoteRepository> getConfiguredRepositories() {
+    public List<RemoteRepository> getConfiguredRepositories() {
         Map<String, Profile> profilesMap = getSettings().getProfilesAsMap();
         List<RemoteRepository> remotes = new ArrayList<>();
 
