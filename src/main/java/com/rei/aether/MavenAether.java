@@ -35,13 +35,14 @@ class MavenAether extends Aether {
     @Override
     protected DefaultRepositorySystemSession newRepositorySystemSession() {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-
-        LocalRepository localRepo = Optional.ofNullable(getSettings().getLocalRepository()).map(LocalRepository::new)
-                                            .orElse(new LocalRepository(DEFAULT_USER_LOCAL_REPOS));
-        
-        session.setLocalRepositoryManager(getRepositorySystem().newLocalRepositoryManager(session, localRepo));
-
+        session.setLocalRepositoryManager(getRepositorySystem().newLocalRepositoryManager(session, getLocalRepository()));
         return session;
+    }
+
+    @Override
+    public LocalRepository getLocalRepository() {
+        return Optional.ofNullable(getSettings().getLocalRepository()).map(LocalRepository::new)
+                       .orElse(new LocalRepository(DEFAULT_USER_LOCAL_REPOS));
     }
 
     @Override

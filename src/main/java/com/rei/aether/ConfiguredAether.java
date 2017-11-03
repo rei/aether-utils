@@ -11,26 +11,30 @@ import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 
-public class ConfiguredAether extends Aether {
+class ConfiguredAether extends Aether {
 
     private List<RemoteRepository> repos;
-    private Path localRepo;
+    private LocalRepository localRepo;
 
-    public ConfiguredAether(Map<String, String> remoteRepos, Path localRepo) {
+    ConfiguredAether(Map<String, String> remoteRepos, Path localRepo) {
         this.repos = remoteRepos.entrySet().stream()
                 .map(e -> new RemoteRepository.Builder(e.getKey(), "default", e.getValue()).build())
                 .collect(toList());
-        this.localRepo = localRepo;
+        this.localRepo = new LocalRepository(localRepo.toFile());
     }
 
     @Override
     protected DefaultRepositorySystemSession newRepositorySystemSession() {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
         
-        session.setLocalRepositoryManager(getRepositorySystem()
-                    .newLocalRepositoryManager(session, new LocalRepository(localRepo.toFile())));
+        session.setLocalRepositoryManager(getRepositorySystem().newLocalRepositoryManager(session, localRepo));
         
         return session;
+    }
+
+    @Override
+    public LocalRepository getLocalRepository() {
+        return localRepo;
     }
 
     @Override

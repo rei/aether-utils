@@ -21,12 +21,14 @@ import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactDescriptorException;
 import org.eclipse.aether.resolution.ArtifactDescriptorRequest;
 import org.eclipse.aether.resolution.ArtifactDescriptorResult;
 import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
@@ -82,7 +84,7 @@ public abstract class Aether {
             DependencyRequest dependencyRequest = new DependencyRequest(request, DependencyFilterUtils.classpathFilter(scope));
     
             return getRepositorySystem().resolveDependencies(session, dependencyRequest).getArtifactResults().stream()
-                                        .map(r -> r.getArtifact())
+                                        .map(ArtifactResult::getArtifact)
                                         .collect(toList());
             
         } catch (ArtifactDescriptorException | org.eclipse.aether.resolution.DependencyResolutionException e) {
@@ -120,6 +122,7 @@ public abstract class Aether {
         return locator.getService(RepositorySystem.class);    
     }
 
+    public abstract LocalRepository getLocalRepository();
     public abstract List<RemoteRepository> getConfiguredRepositories();
     protected abstract DefaultRepositorySystemSession newRepositorySystemSession();
 
