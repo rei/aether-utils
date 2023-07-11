@@ -111,6 +111,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
 							<shadedArtifactAttached>true</shadedArtifactAttached>
 							<shadedClassifierName>allinone</shadedClassifierName> <!-- Any name that makes sense -->
 						</configuration>
