@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.maven.model.building.DefaultModelBuilderFactory;
+import org.apache.maven.model.building.ModelBuilder;
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
 import org.eclipse.aether.DefaultRepositorySystemSession;
 import org.eclipse.aether.RepositorySystem;
@@ -21,6 +23,8 @@ import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
 import org.eclipse.aether.graph.Dependency;
 import org.eclipse.aether.impl.DefaultServiceLocator;
+import org.eclipse.aether.installation.InstallRequest;
+import org.eclipse.aether.installation.InstallationException;
 import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.ArtifactDescriptorException;
@@ -30,8 +34,10 @@ import org.eclipse.aether.resolution.ArtifactRequest;
 import org.eclipse.aether.resolution.ArtifactResolutionException;
 import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
+import org.eclipse.aether.spi.locator.ServiceLocator;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
 import org.eclipse.aether.util.artifact.JavaScopes;
@@ -40,14 +46,14 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Aether {
     private RepositorySystem repositorySystem;
-    
+
     public Artifact resolveSingleArtifact(String gavSpec) {
         ArtifactRequest request = new ArtifactRequest();
         request.setArtifact(new DefaultArtifact(gavSpec));
         request.setRepositories(getConfiguredRepositories());
 
         try {
-            return getRepositorySystem().resolveArtifact(getRespositorySystemSession(), request).getArtifact();
+            return getRepositorySystem().resolveArtifact(getRepositorySystemSession(), request).getArtifact();
         } catch (ArtifactResolutionException e) {
             throw new AetherException(e);
         }
@@ -67,31 +73,34 @@ public abstract class Aether {
     
     public List<Artifact> resolveDependencies(Artifact artifact, String scope) {
         try {
-            RepositorySystemSession session = getRespositorySystemSession();
-            
+            RepositorySystemSession session = getRepositorySystemSession();
+
+            if (artifact.getFile() != null && artifact.getExtension() != null && artifact.getExtension().equals("pom")) {
+                getRepositorySystem().install(session, new InstallRequest().addArtifact(artifact));
+            }
+
             ArtifactDescriptorRequest descriptorRequest = new ArtifactDescriptorRequest()
                     .setArtifact(artifact)
                     .setRepositories(getConfiguredRepositories());
-            
+
             ArtifactDescriptorResult descriptorResult = getRepositorySystem().readArtifactDescriptor(session, descriptorRequest);
-            
             CollectRequest request = new CollectRequest()
-                    .setRoot(new Dependency(artifact, scope))
-                    .setDependencies(descriptorResult.getDependencies())
-                    .setManagedDependencies(descriptorResult.getManagedDependencies())
-                    .setRepositories(getConfiguredRepositories());
-    
+                           .setRoot(new Dependency(artifact, scope))
+                           .setDependencies(descriptorResult.getDependencies())
+                           .setManagedDependencies(descriptorResult.getManagedDependencies())
+                           .setRepositories(getConfiguredRepositories());
+
             DependencyRequest dependencyRequest = new DependencyRequest(request, DependencyFilterUtils.classpathFilter(scope));
     
             return getRepositorySystem().resolveDependencies(session, dependencyRequest).getArtifactResults().stream()
                                         .map(ArtifactResult::getArtifact)
                                         .collect(toList());
             
-        } catch (ArtifactDescriptorException | org.eclipse.aether.resolution.DependencyResolutionException e) {
+        } catch (ArtifactDescriptorException | DependencyResolutionException | InstallationException e) {
             throw new AetherException(e);
         }
     }
-    
+
     protected RepositorySystem getRepositorySystem() {
         if (repositorySystem == null) {
             repositorySystem = newRepositorySystem();
@@ -99,7 +108,7 @@ public abstract class Aether {
         return repositorySystem;
     }
     
-    private RepositorySystemSession getRespositorySystemSession() {
+    private RepositorySystemSession getRepositorySystemSession() {
         DefaultRepositorySystemSession session = newRepositorySystemSession();
         session.setRepositoryListener(new LoggingRepositoryListener(LoggerFactory.getLogger(getClass())));
         session.setTransferListener(new LoggingTransferListener(LoggerFactory.getLogger(getClass())));
@@ -119,7 +128,7 @@ public abstract class Aether {
             }
         });
 
-        return locator.getService(RepositorySystem.class);    
+        return locator.getService(RepositorySystem.class);
     }
 
     public abstract LocalRepository getLocalRepository();

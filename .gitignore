@@ -1,8 +1,11 @@
-target
+target/
+.DS_STORE
 .project
-.settings
+.settings/
 .classpath
-.faces*
-pom.properties
-release.pom
+.factorypath
+.idea
 *.iml
+release.pom
+build/
+.gradle/
