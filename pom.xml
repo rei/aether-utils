@@ -21,7 +21,7 @@
 		<maven.version>3.9.3</maven.version>
 
 		<maven.resolver.version>1.9.13</maven.resolver.version>
-		<slf4j-api.version>2.0.7</slf4j-api.version>
+		<slf4j-api.version>2.0.12</slf4j-api.version>
 		<junit-jupiter-engine.version>5.9.3</junit-jupiter-engine.version>
 	</properties>
 
