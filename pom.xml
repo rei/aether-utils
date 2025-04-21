@@ -7,6 +7,7 @@
 		<groupId>com.rei.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>3</version>
+		<relativePath/>
 	</parent>
 
 	<groupId>com.rei.aether</groupId>
@@ -18,11 +19,11 @@
 
 	<properties>
 		<revision>99999-SNAPSHOT</revision>
-		<maven.version>3.9.3</maven.version>
+		<maven.version>3.9.9</maven.version>
 
-		<maven.resolver.version>1.9.13</maven.resolver.version>
-		<slf4j-api.version>2.0.7</slf4j-api.version>
-		<junit-jupiter-engine.version>5.9.3</junit-jupiter-engine.version>
+		<maven.resolver.version>1.9.22</maven.resolver.version>
+		<slf4j-api.version>2.0.17</slf4j-api.version>
+		<junit-jupiter-engine.version>5.12.2</junit-jupiter-engine.version>
 	</properties>
 
 	<dependencies>
