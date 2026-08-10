@@ -18,38 +18,40 @@ class ConfiguredAether extends Aether {
 
     private final List<RemoteRepository> repos;
     private final LocalRepository localRepo;
-    private final boolean authConfigured;
+    private final boolean preemptiveAuth;
 
-    ConfiguredAether(Map<String, RepoConfig> remoteRepos, Path localRepo) {
+    ConfiguredAether(Map<String, String> remoteRepos, Path localRepo, String username, String password,
+            boolean preemptiveAuth) {
         this.repos = remoteRepos.entrySet().stream()
-                .map(e -> buildRepository(e.getKey(), e.getValue()))
+                .map(e -> buildRepository(e.getKey(), e.getValue(), username, password))
                 .collect(toList());
         this.localRepo = new LocalRepository(localRepo.toFile());
-        this.authConfigured = remoteRepos.values().stream().anyMatch(RepoConfig::hasCredentials);
+        this.preemptiveAuth = preemptiveAuth;
     }
 
-    private static RemoteRepository buildRepository(String id, RepoConfig config) {
-        RemoteRepository.Builder builder = new RemoteRepository.Builder(id, "default", config.url);
-        if (config.hasCredentials()) {
+    private static RemoteRepository buildRepository(String id, String url, String username, String password) {
+        RemoteRepository.Builder builder = new RemoteRepository.Builder(id, "default", url);
+        if (hasCredentials(username, password)) {
             Authentication auth = new AuthenticationBuilder()
-                    .addUsername(config.username)
-                    .addPassword(config.password)
+                    .addUsername(username)
+                    .addPassword(password)
                     .build();
             builder.setAuthentication(auth);
         }
         return builder.build();
     }
 
+    private static boolean hasCredentials(String username, String password) {
+        return username != null && !username.isEmpty() && password != null;
+    }
+
     @Override
     protected DefaultRepositorySystemSession newRepositorySystemSession() {
         DefaultRepositorySystemSession session = MavenRepositorySystemUtils.newSession();
-
         session.setLocalRepositoryManager(getRepositorySystem().newLocalRepositoryManager(session, localRepo));
-
-        if (authConfigured) {
+        if (preemptiveAuth) {
             session.setConfigProperty(ConfigurationProperties.HTTP_PREEMPTIVE_AUTH, true);
         }
-
         return session;
     }
 

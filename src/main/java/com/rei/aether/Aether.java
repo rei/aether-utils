@@ -73,8 +73,7 @@ public abstract class Aether {
         try {
             RepositorySystemSession session = getRepositorySystemSession();
 
-            if (artifact.getFile() != null && artifact.getExtension() != null && artifact.getExtension()
-                    .equals("pom")) {
+            if (artifact.getFile() != null && artifact.getExtension() != null && artifact.getExtension().equals("pom")) {
                 getRepositorySystem().install(session, new InstallRequest().addArtifact(artifact));
             }
 
@@ -82,20 +81,18 @@ public abstract class Aether {
                     .setArtifact(artifact)
                     .setRepositories(getConfiguredRepositories());
 
-            ArtifactDescriptorResult descriptorResult = getRepositorySystem().readArtifactDescriptor(session,
-                    descriptorRequest);
+            ArtifactDescriptorResult descriptorResult = getRepositorySystem().readArtifactDescriptor(session, descriptorRequest);
             CollectRequest request = new CollectRequest()
-                    .setRoot(new Dependency(artifact, scope))
-                    .setDependencies(descriptorResult.getDependencies())
-                    .setManagedDependencies(descriptorResult.getManagedDependencies())
-                    .setRepositories(getConfiguredRepositories());
+                           .setRoot(new Dependency(artifact, scope))
+                           .setDependencies(descriptorResult.getDependencies())
+                           .setManagedDependencies(descriptorResult.getManagedDependencies())
+                           .setRepositories(getConfiguredRepositories());
 
-            DependencyRequest dependencyRequest = new DependencyRequest(request,
-                    DependencyFilterUtils.classpathFilter(scope));
+            DependencyRequest dependencyRequest = new DependencyRequest(request, DependencyFilterUtils.classpathFilter(scope));
 
             return getRepositorySystem().resolveDependencies(session, dependencyRequest).getArtifactResults().stream()
-                    .map(ArtifactResult::getArtifact)
-                    .collect(toList());
+                                        .map(ArtifactResult::getArtifact)
+                                        .collect(toList());
 
         } catch (ArtifactDescriptorException | DependencyResolutionException | InstallationException e) {
             throw new AetherException(e);
@@ -133,9 +130,7 @@ public abstract class Aether {
     }
 
     public abstract LocalRepository getLocalRepository();
-
     public abstract List<RemoteRepository> getConfiguredRepositories();
-
     protected abstract DefaultRepositorySystemSession newRepositorySystemSession();
 
     public static Aether fromMavenSettings() {
@@ -147,24 +142,29 @@ public abstract class Aether {
     }
 
     public static class Builder {
-        private final Map<String, RepoConfig> remoteRepos = new HashMap<>();
+        private final Map<String, String> remoteRepos = new HashMap<>();
         private Path localRepo;
+        private String username;
+        private String password;
+        private boolean preemptiveAuth;
 
         public Builder setDefaultRemoteRepo(String url) {
             return addRemoteRepo(DEFAULT_REPO_ID, url);
         }
 
-        public Builder setDefaultRemoteRepo(String url, String username, String password) {
-            return addRemoteRepo(DEFAULT_REPO_ID, url, username, password);
-        }
-
         public Builder addRemoteRepo(String id, String url) {
-            remoteRepos.put(id, new RepoConfig(url));
+            remoteRepos.put(id, url);
             return this;
         }
 
-        public Builder addRemoteRepo(String id, String url, String username, String password) {
-            remoteRepos.put(id, new RepoConfig(url, username, password));
+        public Builder setAuthentication(String username, String password) {
+            this.username = username;
+            this.password = password;
+            return this;
+        }
+
+        public Builder setPreemptiveAuthentication(boolean preemptiveAuth) {
+            this.preemptiveAuth = preemptiveAuth;
             return this;
         }
 
@@ -186,7 +186,7 @@ public abstract class Aether {
         }
 
         public Aether build() {
-            return new ConfiguredAether(remoteRepos, localRepo);
+            return new ConfiguredAether(remoteRepos, localRepo, username, password, preemptiveAuth);
         }
     }
 }

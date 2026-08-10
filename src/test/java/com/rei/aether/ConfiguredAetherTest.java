@@ -17,7 +17,7 @@ public class ConfiguredAetherTest {
     public static final String REPO_PASSWORD = "test-password";
 
     @Test
-    void builderWithoutCredentials_createsRepositoryWithoutAuth() {
+    void builderWithoutAuth_createsRepositoryWithoutAuth() {
         Aether aether = Aether.builder()
                 .setDefaultRemoteRepo(REPO_URL)
                 .setTempLocalRepo()
@@ -30,7 +30,7 @@ public class ConfiguredAetherTest {
     }
 
     @Test
-    void builderWithoutCredentials_doesNotEnablePreemptiveAuth() {
+    void builderWithoutPreemptiveAuth_doesNotEnablePreemptiveAuth() {
         Aether aether = Aether.builder()
                 .setDefaultRemoteRepo(REPO_URL)
                 .setTempLocalRepo()
@@ -43,9 +43,10 @@ public class ConfiguredAetherTest {
     }
 
     @Test
-    void builderWithCredentials_createsRepositoryWithAuth() {
+    void builderWithAuthentication_createsRepositoryWithAuth() {
         Aether aether = Aether.builder()
-                .setDefaultRemoteRepo(REPO_URL, REPO_USERNAME, REPO_PASSWORD)
+                .setDefaultRemoteRepo(REPO_URL)
+                .setAuthentication(REPO_USERNAME, REPO_PASSWORD)
                 .setTempLocalRepo()
                 .build();
 
@@ -56,25 +57,31 @@ public class ConfiguredAetherTest {
     }
 
     @Test
-    void builderWithCredentials_enablesPreemptiveAuth() {
+    void builderWithPreemptiveAuthentication_enablesPreemptiveAuth() {
         Aether aether = Aether.builder()
-                .setDefaultRemoteRepo(REPO_URL, REPO_USERNAME, REPO_PASSWORD)
+                .setDefaultRemoteRepo(REPO_URL)
+                .setPreemptiveAuthentication(true)
                 .setTempLocalRepo()
                 .build();
 
         DefaultRepositorySystemSession session = aether.newRepositorySystemSession();
 
-        assertEquals(Boolean.TRUE, session.getConfigProperties().get(ConfigurationProperties.HTTP_PREEMPTIVE_AUTH));
+        assertEquals(true, session.getConfigProperties().get(ConfigurationProperties.HTTP_PREEMPTIVE_AUTH));
     }
 
     @Test
-    void addRemoteRepoWithCredentials_appliesToNamedRepo() {
+    void builderWithAuthenticationAndPreemptiveAuth_createsAuthenticatedRepoAndEnablesPreemptiveAuth() {
         Aether aether = Aether.builder()
-                .addRemoteRepo("default", REPO_URL, REPO_USERNAME, REPO_PASSWORD)
+                .setDefaultRemoteRepo(REPO_URL)
+                .setAuthentication(REPO_USERNAME, REPO_PASSWORD)
+                .setPreemptiveAuthentication(true)
                 .setTempLocalRepo()
                 .build();
 
-        assertEquals(1, aether.getConfiguredRepositories().size());
-        assertNotNull(aether.getConfiguredRepositories().get(0).getAuthentication());
+        RemoteRepository repo = aether.getConfiguredRepositories().get(0);
+        assertNotNull(repo.getAuthentication());
+
+        DefaultRepositorySystemSession session = aether.newRepositorySystemSession();
+        assertEquals(true, session.getConfigProperties().get(ConfigurationProperties.HTTP_PREEMPTIVE_AUTH));
     }
 }
