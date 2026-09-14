@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.rei.oss</groupId>
 		<artifactId>oss-parent</artifactId>
-		<version>3</version>
+		<version>4</version>
 		<relativePath/>
 	</parent>
 
@@ -16,6 +16,7 @@
 
 	<name>Aether Utils</name>
 	<description>Utility library to make simple use cases working with Aether much easier</description>
+	<url>https://github.com/rei/aether-utils</url>
 
 	<properties>
 		<revision>99999-SNAPSHOT</revision>
@@ -132,6 +133,6 @@
 	<scm>
 		<connection>scm:git:git://github.com/rei/aether-utils.git</connection>
 		<developerConnection>scm:git:ssh://github.com:rei/aether-utils.git</developerConnection>
-		<url>http://github.com/rei/rei/aether-utils</url>
+		<url>http://github.com/rei/aether-utils</url>
 	</scm>
 </project>
