@@ -108,6 +108,7 @@ public abstract class Aether {
 
     private RepositorySystemSession getRepositorySystemSession() {
         DefaultRepositorySystemSession session = newRepositorySystemSession();
+        session.setSystemProperties(System.getProperties());
         session.setRepositoryListener(new LoggingRepositoryListener(LoggerFactory.getLogger(getClass())));
         session.setTransferListener(new LoggingTransferListener(LoggerFactory.getLogger(getClass())));
         return session;
